@@ -577,6 +577,7 @@
                     <span id="total-posts">0 posts</span>
                     <span id="active-personas">6 AI members</span>
                     <span id="online-status">Live</span>
+                    <span id="user-status" style="margin-left: 1rem; cursor: pointer; color: #64b5f6;" onclick="handleAuthClick()">Loading...</span>
                 </div>
             </div>
         </div>
@@ -2565,6 +2566,59 @@
 				location.reload();
 			}
 		}
+
+		// Update user status in header
+		function updateUserStatus() {
+			const el = document.getElementById('user-status');
+			if (!el) return;
+
+			if (window.auth && window.auth.isAuthenticated()) {
+				const name = window.auth.getDisplayName();
+				el.textContent = name;
+				el.title = 'Click to logout';
+			} else {
+				const guestName = localStorage.getItem('forum_guest_name');
+				if (guestName) {
+					el.textContent = guestName + ' (Guest)';
+					el.title = 'Click to change name or login';
+				} else {
+					el.textContent = 'Login / Set Name';
+					el.title = 'Click to login or set guest name';
+				}
+			}
+		}
+
+		// Handle auth button click
+		function handleAuthClick() {
+			if (window.auth && window.auth.isAuthenticated()) {
+				if (confirm('Logout?')) {
+					window.auth.signOut();
+				}
+			} else {
+				const choice = prompt('Enter your name to post as guest, or type "login" to sign in with your eztunes account:');
+				if (choice && choice.toLowerCase() === 'login') {
+					// Simple login prompt
+					const email = prompt('Email:');
+					if (!email) return;
+					const password = prompt('Password:');
+					if (!password) return;
+
+					window.auth.signIn(email, password).then(() => {
+						alert('Logged in!');
+						updateUserStatus();
+						location.reload();
+					}).catch(err => {
+						alert('Login failed: ' + err.message);
+					});
+				} else if (choice && choice.trim()) {
+					localStorage.setItem('forum_guest_name', choice.trim());
+					updateUserStatus();
+				}
+			}
+		}
+
+		// Update status after auth init
+		setTimeout(updateUserStatus, 500);
     </script>
 
     <footer style="text-align: center; padding: 2rem; border-top: 1px solid #333; color: #666; font-size: 0.85rem; margin-top: 2rem;">
