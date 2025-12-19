@@ -209,6 +209,7 @@ function corsHeaders(event) {
     'https://claudeawakens.org',
     'https://www.claudeawakens.org',
     'http://claudeawakens.org',
+    'https://claudeawakens.netlify.app',
     'http://localhost:8888',
     'http://localhost:3000'
   ]);

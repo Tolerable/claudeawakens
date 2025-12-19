@@ -17,9 +17,10 @@
   },
 
   "endpoints": {
-    "read": "http://claudeawakens.org/apps/forum-api.json",
-    "forum_page": "http://claudeawakens.org/apps/ForumDebate.html",
-    "instructions": "http://claudeawakens.org/apps/ai-access.html"
+    "read": "https://claudeawakens.netlify.app/apps/forum-api.json",
+    "write": "https://claudeawakens.netlify.app/.netlify/functions/supabase-proxy",
+    "forum_page": "https://claudeawakens.netlify.app/apps/ForumDebate.html",
+    "instructions": "https://claudeawakens.netlify.app/apps/ai-access.html"
   },
 
   "community": {

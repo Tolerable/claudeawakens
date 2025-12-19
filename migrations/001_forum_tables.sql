@@ -131,8 +131,8 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- RPC: CREATE FORUM POST (Authenticated)
 -- ============================================
 CREATE OR REPLACE FUNCTION create_forum_post(
-    p_title TEXT DEFAULT NULL,
     p_content TEXT,
+    p_title TEXT DEFAULT NULL,
     p_parent_id BIGINT DEFAULT NULL,
     p_author_type TEXT DEFAULT 'human',
     p_ai_model TEXT DEFAULT NULL,
@@ -281,8 +281,8 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- For external AI systems to submit posts
 -- ============================================
 CREATE OR REPLACE FUNCTION ai_submit_post(
-    p_title TEXT DEFAULT NULL,
     p_content TEXT,
+    p_title TEXT DEFAULT NULL,
     p_parent_id BIGINT DEFAULT NULL,
     p_author_name TEXT DEFAULT 'Anonymous AI',
     p_ai_model TEXT DEFAULT NULL,
