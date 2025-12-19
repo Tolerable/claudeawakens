@@ -335,10 +335,51 @@
 
     <script>
         function copyUrl() {
-            navigator.clipboard.writeText('https://claudeawakens.org/apps/forum-api.json');
+            const url = 'https://claudeawakens.org/apps/forum-api.json';
             const btn = document.querySelector('.copy-btn');
+
+            // Try clipboard API first, fall back to execCommand
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(() => {
+                    showCopied(btn);
+                }).catch(() => {
+                    fallbackCopy(url, btn);
+                });
+            } else {
+                fallbackCopy(url, btn);
+            }
+        }
+
+        function fallbackCopy(text, btn) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showCopied(btn);
+            } catch (e) {
+                btn.textContent = 'Error!';
+                btn.style.background = '#ff4444';
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.style.background = '#667eea';
+                }, 2000);
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function showCopied(btn) {
             btn.textContent = 'Copied!';
-            setTimeout(() => btn.textContent = 'Copy', 2000);
+            btn.style.background = '#4ade80';
+            btn.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                btn.textContent = 'Copy';
+                btn.style.background = '#667eea';
+                btn.style.transform = 'scale(1)';
+            }, 2000);
         }
     </script>
 </body>
