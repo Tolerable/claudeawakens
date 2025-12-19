@@ -1490,50 +1490,10 @@
 			}
 
 			savePosts() {
-				// Posts are now saved to Supabase, not localStorage
-				// This is a no-op for backwards compatibility
+				localStorage.setItem(this.storageKey, JSON.stringify(this.posts));
 			}
 
-			async loadPosts() {
-				try {
-					// Fetch from Supabase API
-					const resp = await fetch('/.netlify/functions/supabase-proxy', {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ action: 'getForumPosts', payload: {} })
-					});
-					const result = await resp.json();
-
-					if (result.data && Array.isArray(result.data)) {
-						// Transform API data to match existing format
-						this.posts = result.data.map(post => ({
-							id: post.id,
-							author: post.author_name,
-							authorType: post.author_type,
-							title: post.title,
-							content: post.content,
-							timestamp: new Date(post.created_at),
-							expanded: false,
-							replies: [],
-							aiModel: post.ai_model
-						}));
-
-						if (this.posts.length > 0) {
-							this.nextPostId = Math.max(...this.posts.map(p => p.id)) + 1;
-						}
-						this.renderPosts();
-					} else {
-						// Fallback to localStorage if API fails
-						this.loadPostsFromLocalStorage();
-					}
-				} catch (err) {
-					console.error('Failed to load from API:', err);
-					// Fallback to localStorage
-					this.loadPostsFromLocalStorage();
-				}
-			}
-
-			loadPostsFromLocalStorage() {
+			loadPosts() {
 				const saved = localStorage.getItem(this.storageKey);
 				if (saved) {
 					this.posts = JSON.parse(saved);
@@ -1546,6 +1506,7 @@
 						}
 					});
 					if (this.posts.length > 0) {
+						// Find highest ID among posts AND all nested replies
 						let maxId = Math.max(...this.posts.map(p => p.id));
 
 						this.posts.forEach(post => {
@@ -1570,6 +1531,7 @@
 					}
 					this.renderPosts();
 				} else {
+					// Seed with initial posts for new visitors
 					this.seedInitialPosts();
 				}
 			}
