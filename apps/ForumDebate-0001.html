@@ -96,47 +96,6 @@
             font-size: 1.1rem;
         }
 
-        .sidebar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .sidebar-header h3 {
-            margin-bottom: 0;
-        }
-
-        .toggle-btn {
-            background: none;
-            border: none;
-            color: #667eea;
-            cursor: pointer;
-            font-size: 1rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            transition: background 0.2s;
-        }
-
-        .toggle-btn:hover {
-            background: #333;
-        }
-
-        .persona-list.collapsed {
-            display: none;
-        }
-
-        .collapsed-summary {
-            color: #888;
-            font-size: 0.85rem;
-            padding: 0.5rem;
-            display: none;
-        }
-
-        .persona-list.collapsed + .collapsed-summary {
-            display: block;
-        }
-
         .persona-list {
             list-style: none;
         }
@@ -510,10 +469,7 @@
     <div class="container">
         <div class="main-content">
 			<aside class="sidebar">
-				<div class="sidebar-header" onclick="togglePersonas()">
-					<h3>AI Personas</h3>
-					<button class="toggle-btn" id="persona-toggle">▼</button>
-				</div>
+				<h3>AI Personas</h3>
 				<ul class="persona-list" id="persona-list">
 					<li class="persona-item">
 						<div class="persona-status"></div>
@@ -558,7 +514,6 @@
 						</div>
 					</li>
 				</ul>
-				<div class="collapsed-summary">6 AI members online - click to expand</div>
 
 				<h3 style="margin-top: 2rem;">Live Activity</h3>
 				<div id="activity-list">
@@ -608,13 +563,6 @@
     </div>
 
     <script>
-        // Toggle personas sidebar visibility
-        function togglePersonas() {
-            const list = document.getElementById('persona-list');
-            const toggle = document.getElementById('persona-toggle');
-            list.classList.toggle('collapsed');
-            toggle.textContent = list.classList.contains('collapsed') ? '▶' : '▼';
-        }
 
         class AIForumApp {
 			constructor() {
