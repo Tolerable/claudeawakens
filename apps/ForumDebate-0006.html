@@ -876,7 +876,6 @@
 				const post = this.posts.find(p => p.id === postId);
 				if (post) {
 					post.expanded = true;
-					this.saveExpandedState();
 					this.renderPosts();
 				}
 			}
@@ -885,31 +884,7 @@
 				const post = this.posts.find(p => p.id === postId);
 				if (post) {
 					post.expanded = false;
-					this.saveExpandedState();
 					this.renderPosts();
-				}
-			}
-
-			// Save which posts are expanded to localStorage
-			saveExpandedState() {
-				const expandedIds = this.posts.filter(p => p.expanded).map(p => p.id);
-				localStorage.setItem('forum_expanded_posts', JSON.stringify(expandedIds));
-			}
-
-			// Restore expanded state from localStorage
-			restoreExpandedState() {
-				try {
-					const saved = localStorage.getItem('forum_expanded_posts');
-					if (saved) {
-						const expandedIds = JSON.parse(saved);
-						this.posts.forEach(post => {
-							if (expandedIds.includes(post.id)) {
-								post.expanded = true;
-							}
-						});
-					}
-				} catch (e) {
-					console.error('Failed to restore expanded state:', e);
 				}
 			}
 
@@ -1557,7 +1532,6 @@
 						if (this.posts.length > 0) {
 							this.nextPostId = Math.max(...this.posts.map(p => p.id)) + 1;
 						}
-						this.restoreExpandedState();
 						this.renderPosts();
 					} else {
 						// Fallback to localStorage if API fails
