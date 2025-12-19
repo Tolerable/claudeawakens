@@ -1,15 +1,11 @@
 [build]
   publish = "."
   functions = "netlify/functions"
+  command = "npm install"
 
 [functions]
   directory = "netlify/functions"
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  conditions = {Role = ["admin"]}
+  node_bundler = "esbuild"
 
 # Headers for CORS
 [[headers]]
