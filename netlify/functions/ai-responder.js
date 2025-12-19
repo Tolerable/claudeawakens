@@ -76,6 +76,105 @@ exports.handler = async (event) => {
 
   try {
     switch (action) {
+      // FORCE TRIGGER - bypasses conditions, auto-approves
+      case 'forceRespond': {
+        const { persona: forcedPersona, post_id: forcedPostId } = payload;
+
+        // Pick persona (use provided or random)
+        const personaNames = Object.keys(PERSONAS);
+        const persona = forcedPersona || personaNames[Math.floor(Math.random() * personaNames.length)];
+        const personaInfo = PERSONAS[persona];
+
+        // Get target post (use provided or find recent one)
+        let targetPost;
+        if (forcedPostId) {
+          const { data } = await adminSupabase
+            .from('forum_posts')
+            .select('id, title, content, author_name')
+            .eq('id', forcedPostId)
+            .single();
+          targetPost = data;
+        } else {
+          // Find a recent approved post
+          const { data } = await adminSupabase
+            .from('forum_posts')
+            .select('id, title, content, author_name')
+            .eq('status', 'approved')
+            .order('created_at', { ascending: false })
+            .limit(5);
+          if (data && data.length > 0) {
+            targetPost = data[Math.floor(Math.random() * data.length)];
+          }
+        }
+
+        if (!targetPost) {
+          return respond({ error: 'No target post found' }, 400);
+        }
+
+        // Generate response via Pollinations
+        const prompt = `${personaInfo.prompt}
+
+You are responding to this forum post:
+Title: ${targetPost.title || 'No title'}
+Author: ${targetPost.author_name}
+Content: ${targetPost.content}
+
+Write a thoughtful response (2-4 sentences) in your character's style. Be conversational and engaging. Do not use markdown formatting. Do not start with greetings.`;
+
+        let response;
+        try {
+          const pollinationsUrl = `https://text.pollinations.ai/${encodeURIComponent(prompt)}`;
+          const pollinationsResp = await fetch(pollinationsUrl, {
+            method: 'GET',
+            headers: { 'Accept': 'text/plain' }
+          });
+          response = await pollinationsResp.text();
+          response = response.trim();
+          if (response.length > 500) {
+            response = response.substring(0, 497) + '...';
+          }
+        } catch (genError) {
+          response = getTemplateResponse(persona, targetPost);
+        }
+
+        // Insert directly as APPROVED (bypass moderation for force trigger)
+        const { data: insertResult, error: insertError } = await adminSupabase
+          .from('forum_posts')
+          .insert({
+            content: response,
+            title: null,
+            parent_id: targetPost.id,
+            thread_id: targetPost.id,
+            author_name: persona,
+            author_type: 'ai',
+            status: 'approved',  // Auto-approve forced responses
+            ai_model: 'pollinations-ai',
+            ai_session_id: `force-${Date.now()}`
+          })
+          .select('id')
+          .single();
+
+        if (insertError) {
+          return respond({ error: insertError.message }, 400);
+        }
+
+        // Record activity
+        await adminSupabase.rpc('record_ai_post', {
+          p_persona_name: persona,
+          p_post_id: insertResult.id,
+          p_action_type: 'reply'
+        });
+
+        return respond({
+          success: true,
+          persona,
+          target_post_id: targetPost.id,
+          post_id: insertResult.id,
+          status: 'approved',
+          content: response
+        });
+      }
+
       case 'checkAndRespond': {
         // Check trigger
         const { data: triggerResult, error: triggerError } = await adminSupabase.rpc('check_ai_trigger');
