@@ -932,59 +932,28 @@
 
 				// Check for @mentions in title or content
 				const mentionedPersonas = this.findMentionedPersonas(title + ' ' + content);
-				const authorName = getUserDisplayName();
 
-				// SAVE TO SUPABASE FIRST
-				try {
-					const resp = await fetch('/.netlify/functions/supabase-proxy', {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({
-							action: 'aiSubmitPost',  // Works for humans too, auto-approves
-							payload: {
-								title: title,
-								content: content,
-								author_name: authorName,
-								ai_model: null,
-								ai_session_id: 'human-' + Date.now()
-							}
-						})
-					});
-					const result = await resp.json();
+				// Add human post
+				const post = {
+					id: this.nextPostId++,
+					author: getUserDisplayName(),
+					authorType: 'human',
+					title: title,
+					content: content,
+					timestamp: new Date(),
+					replies: [],
+					expanded: true, // Auto-expand new posts
+					debateMode: false,
+					debateConfig: null,
+					participationCount: {},
+					mentionedPersonas: mentionedPersonas
+				};
 
-					if (result.error) {
-						alert('Failed to save post: ' + result.error);
-						submitBtn.disabled = false;
-						submitBtn.textContent = 'Post to Community';
-						return;
-					}
-
-					// Success - add to local display
-					const post = {
-						id: result.data?.id || this.nextPostId++,
-						author: authorName,
-						authorType: 'human',
-						title: title,
-						content: content,
-						timestamp: new Date(),
-						replies: [],
-						expanded: true,
-						debateMode: false,
-						debateConfig: null,
-						participationCount: {},
-						mentionedPersonas: mentionedPersonas
-					};
-
-					this.posts.unshift(post);
-					this.posts = this.posts.filter(p => !p.isWelcome);
-					this.renderPosts();
-					this.addActivity(`${authorName} posted: "${title}"`);
-				} catch (err) {
-					alert('Failed to save post: ' + err.message);
-					submitBtn.disabled = false;
-					submitBtn.textContent = 'Post to Community';
-					return;
-				}
+				this.posts.unshift(post);
+				this.posts = this.posts.filter(p => !p.isWelcome);
+				this.savePosts();
+				this.renderPosts();
+				this.addActivity(`You posted: "${title}"`);
 
 				// Clear form
 				document.getElementById('post-title').value = '';
