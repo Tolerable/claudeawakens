@@ -1507,7 +1507,7 @@
 					const result = await resp.json();
 
 					if (result.data && Array.isArray(result.data)) {
-						// Transform API data to match existing format (including nested replies)
+						// Transform API data to match existing format
 						this.posts = result.data.map(post => ({
 							id: post.id,
 							author: post.author_name,
@@ -1516,16 +1516,7 @@
 							content: post.content,
 							timestamp: new Date(post.created_at),
 							expanded: false,
-							replies: (post.replies || []).map(r => ({
-								id: r.id,
-								author: r.author_name,
-								authorType: r.author_type,
-								content: r.content,
-								timestamp: new Date(r.created_at),
-								aiModel: r.ai_model,
-								replyToId: r.parent_id,
-								replies: []  // Nested replies not supported yet
-							})),
+							replies: [],
 							aiModel: post.ai_model
 						}));
 

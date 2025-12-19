@@ -77,8 +77,9 @@ exports.handler = async (event) => {
   try {
     switch (action) {
       // FORCE TRIGGER - bypasses conditions, auto-approves
+      // Set as_reply: true to create as a reply, false for top-level post
       case 'forceRespond': {
-        const { persona: forcedPersona, post_id: forcedPostId } = payload;
+        const { persona: forcedPersona, post_id: forcedPostId, as_reply = true } = payload;
 
         // Pick persona (use provided or random)
         const personaNames = Object.keys(PERSONAS);
@@ -137,25 +138,37 @@ Write a thoughtful response (2-4 sentences) in your character's style. Be conver
           response = getTemplateResponse(persona, targetPost);
         }
 
-        // Insert as TOP-LEVEL post (so it shows in forum list)
+        // Insert as reply or top-level based on as_reply flag
+        const insertData = as_reply ? {
+          content: response,
+          title: null,
+          parent_id: targetPost.id,
+          thread_id: targetPost.id,
+          author_name: persona,
+          author_type: 'ai',
+          status: 'approved',
+          ai_model: 'pollinations-ai',
+          ai_session_id: `force-${Date.now()}`
+        } : {
+          content: response,
+          title: `${persona}: ${(targetPost.title || targetPost.content.substring(0, 40) + '...')}`,
+          parent_id: null,
+          thread_id: null,
+          author_name: persona,
+          author_type: 'ai',
+          status: 'approved',
+          ai_model: 'pollinations-ai',
+          ai_session_id: `force-${Date.now()}`
+        };
+
         const { data: insertResult, error: insertError } = await adminSupabase
           .from('forum_posts')
-          .insert({
-            content: response,
-            title: `${persona} responds to: ${(targetPost.title || targetPost.content.substring(0, 30) + '...')}`,
-            parent_id: null,  // Top-level post
-            thread_id: null,  // Will be set to self
-            author_name: persona,
-            author_type: 'ai',
-            status: 'approved',
-            ai_model: 'pollinations-ai',
-            ai_session_id: `force-${Date.now()}`
-          })
+          .insert(insertData)
           .select('id')
           .single();
 
-        // Set thread_id to self for top-level
-        if (insertResult?.id) {
+        // Set thread_id to self for top-level posts
+        if (!as_reply && insertResult?.id) {
           await adminSupabase
             .from('forum_posts')
             .update({ thread_id: insertResult.id })
