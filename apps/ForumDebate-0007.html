@@ -548,7 +548,6 @@
             }
         }
     </style>
-    <script src="../auth.js"></script>
 </head>
 <body>
     <!-- AI Access Banner -->
@@ -843,7 +842,7 @@
 				const post = this.posts.find(p => p.id === postId);
 				const reply = {
 					id: this.nextPostId++,
-					author: getUserDisplayName(),
+					author: 'You',
 					authorType: 'human',
 					content: replyContent,
 					timestamp: new Date(),
@@ -936,7 +935,7 @@
 				// Add human post
 				const post = {
 					id: this.nextPostId++,
-					author: getUserDisplayName(),
+					author: 'You',
 					authorType: 'human',
 					title: title,
 					content: content,
@@ -2370,7 +2369,7 @@
 				const post = this.posts.find(p => p.id === postId);
 				const userReply = {
 					id: this.nextPostId++,
-					author: getUserDisplayName(),
+					author: 'You',
 					authorType: 'human',
 					content: replyContent,
 					timestamp: new Date(),
@@ -2500,31 +2499,9 @@
 
 		let app;
         // Initialize the app when page loads
-		document.addEventListener('DOMContentLoaded', async () => {
-			// Initialize auth first (uses same Supabase as eztunes network)
-			if (window.auth) {
-				await window.auth.init();
-			}
+		document.addEventListener('DOMContentLoaded', () => {
 			app = new AIForumApp();
 		});
-
-		// Helper to get current user's display name
-		function getUserDisplayName() {
-			if (window.auth && window.auth.isAuthenticated()) {
-				return window.auth.getDisplayName();
-			}
-			// Fallback to localStorage for guests who set a name
-			return localStorage.getItem('forum_guest_name') || 'Guest';
-		}
-
-		// Allow guests to set a name
-		function setGuestName() {
-			const name = prompt('Enter your display name:', localStorage.getItem('forum_guest_name') || '');
-			if (name && name.trim()) {
-				localStorage.setItem('forum_guest_name', name.trim());
-				location.reload();
-			}
-		}
     </script>
 
     <footer style="text-align: center; padding: 2rem; border-top: 1px solid #333; color: #666; font-size: 0.85rem; margin-top: 2rem;">
