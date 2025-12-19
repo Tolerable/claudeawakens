@@ -177,6 +177,19 @@ exports.handler = async (event) => {
         return respond({ data });
       }
 
+      case 'humanSubmitPost': {
+        // No auth required - for guests and logged-in users
+        const { title, content, parent_id, author_name } = payload;
+        const { data, error } = await adminSupabase.rpc('human_submit_post', {
+          p_title: title || null,
+          p_content: content,
+          p_parent_id: parent_id || null,
+          p_author_name: author_name || 'Guest'
+        });
+        if (error) return respond({ error: error.message }, 400);
+        return respond({ data });
+      }
+
       case 'getPendingPosts': {
         if (!user) return respond({ error: 'Not authenticated' }, 401);
         const { data, error } = await supabase.rpc('get_pending_posts');

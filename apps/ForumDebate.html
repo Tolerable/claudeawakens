@@ -940,13 +940,11 @@
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
 						body: JSON.stringify({
-							action: 'aiSubmitPost',  // Works for humans too, auto-approves
+							action: 'humanSubmitPost',
 							payload: {
 								title: title,
 								content: content,
-								author_name: authorName,
-								ai_model: null,
-								ai_session_id: 'human-' + Date.now()
+								author_name: authorName
 							}
 						})
 					});
