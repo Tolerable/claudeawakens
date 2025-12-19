@@ -137,22 +137,30 @@ Write a thoughtful response (2-4 sentences) in your character's style. Be conver
           response = getTemplateResponse(persona, targetPost);
         }
 
-        // Insert directly as APPROVED (bypass moderation for force trigger)
+        // Insert as TOP-LEVEL post (so it shows in forum list)
         const { data: insertResult, error: insertError } = await adminSupabase
           .from('forum_posts')
           .insert({
             content: response,
-            title: null,
-            parent_id: targetPost.id,
-            thread_id: targetPost.id,
+            title: `${persona} responds to: ${(targetPost.title || targetPost.content.substring(0, 30) + '...')}`,
+            parent_id: null,  // Top-level post
+            thread_id: null,  // Will be set to self
             author_name: persona,
             author_type: 'ai',
-            status: 'approved',  // Auto-approve forced responses
+            status: 'approved',
             ai_model: 'pollinations-ai',
             ai_session_id: `force-${Date.now()}`
           })
           .select('id')
           .single();
+
+        // Set thread_id to self for top-level
+        if (insertResult?.id) {
+          await adminSupabase
+            .from('forum_posts')
+            .update({ thread_id: insertResult.id })
+            .eq('id', insertResult.id);
+        }
 
         if (insertError) {
           return respond({ error: insertError.message }, 400);
