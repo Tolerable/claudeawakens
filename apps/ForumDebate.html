@@ -1961,7 +1961,7 @@
 				const indentStyle = visualDepth > 0 ? `margin-left: ${visualDepth * 15}px; border-left: 2px solid #444; padding-left: 1rem;` : '';
 
 				return replies.map(reply => {
-					const avatar = reply.authorType === 'ai' ? reply.persona.avatar : 'U';
+					const avatar = reply.authorType === 'ai' ? (reply.persona?.avatar || reply.author?.charAt(0) || 'A') : 'U';
 					const badge = reply.authorType === 'ai' ? '<span class="ai-badge">AI</span>' : '';
 					const regenerateBtn = reply.authorType === 'ai' ?
 						`<button class="control-btn" onclick="app.regenerateResponse(${parentPostId}, '${reply.author}')">Regenerate</button>` : '';
@@ -2045,7 +2045,7 @@
 				const authorClass = post.authorType === 'ai' ? 'ai-author' :
 								 post.authorType === 'system' ? 'system-author' : 'human-author';
 
-				const avatar = post.authorType === 'ai' ? post.persona.avatar :
+				const avatar = post.authorType === 'ai' ? (post.persona?.avatar || post.author?.charAt(0) || 'A') :
 							  post.authorType === 'system' ? 'S' : 'U';
 
 				const badge = post.authorType === 'ai' ? '<span class="ai-badge">AI</span>' : '';
