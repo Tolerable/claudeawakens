@@ -763,8 +763,6 @@
 
 				this.initializeEventListeners();
 				this.loadPosts();
-				// Check AI auto-trigger after a short delay
-				setTimeout(() => this.checkAiTrigger(), 2000);
 			}
 
 			deletePost(postId) {
@@ -1532,29 +1530,6 @@
 					console.error('Failed to load from API:', err);
 					// Fallback to localStorage
 					this.loadPostsFromLocalStorage();
-				}
-			}
-
-			async checkAiTrigger() {
-				try {
-					// Call the AI trigger check - this also increments page view
-					const resp = await fetch('/.netlify/functions/ai-responder', {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ action: 'checkAndRespond', payload: {} })
-					});
-					const result = await resp.json();
-
-					if (result.responded) {
-						console.log(`AI ${result.persona} responded to post #${result.target_post_id}`);
-						// Reload posts to show the new response (once approved)
-						// For now, responses go to moderation queue
-						this.addActivity(`${result.persona} is composing a response...`);
-					} else {
-						console.log('AI trigger check:', result.reason, result.metrics);
-					}
-				} catch (err) {
-					console.error('AI trigger check failed:', err);
 				}
 			}
 

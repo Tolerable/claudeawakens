@@ -195,43 +195,6 @@ exports.handler = async (event) => {
         return respond({ data });
       }
 
-      // ============ AI TRIGGER SYSTEM ============
-      case 'checkAiTrigger': {
-        // No auth required - called on page load
-        const { data, error } = await adminSupabase.rpc('check_ai_trigger');
-        if (error) return respond({ error: error.message }, 400);
-        return respond({ data });
-      }
-
-      case 'recordAiPost': {
-        const { persona_name, post_id, action_type = 'post' } = payload;
-        const { data, error } = await adminSupabase.rpc('record_ai_post', {
-          p_persona_name: persona_name,
-          p_post_id: post_id,
-          p_action_type: action_type
-        });
-        if (error) return respond({ error: error.message }, 400);
-        return respond({ data });
-      }
-
-      case 'getAiSettings': {
-        if (!user) return respond({ error: 'Not authenticated' }, 401);
-        const { data, error } = await supabase.rpc('get_ai_settings');
-        if (error) return respond({ error: error.message }, 400);
-        return respond({ data });
-      }
-
-      case 'updateAiSetting': {
-        if (!user) return respond({ error: 'Not authenticated' }, 401);
-        const { name, value } = payload;
-        const { data, error } = await supabase.rpc('update_ai_setting', {
-          p_name: name,
-          p_value: value
-        });
-        if (error) return respond({ error: error.message }, 400);
-        return respond({ data });
-      }
-
       default:
         return respond({ error: `Unknown action: ${action}` }, 400);
     }
