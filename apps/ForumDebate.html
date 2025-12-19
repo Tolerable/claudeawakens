@@ -388,6 +388,17 @@
             color: #e0e0e0;
         }
 
+        .action-btn.reply-action {
+            color: #64b5f6;
+            border: 1px solid #64b5f644;
+        }
+
+        .action-btn.reply-action:hover {
+            background: #64b5f622;
+            color: #90caf9;
+            border-color: #64b5f6;
+        }
+
         .replies {
             margin-left: 2rem;
             margin-top: 1rem;
@@ -2072,7 +2083,7 @@
 						</div>
 						<div class="post-content">${reply.content}</div>
 						<div class="post-actions" style="margin-top: 0.5rem;">
-							<button class="action-btn" onclick="app.replyToAI(${parentPostId}, '${reply.author}', ${reply.id})">Reply</button>
+							<button class="action-btn reply-action" onclick="app.replyToAI(${parentPostId}, '${reply.author}', ${reply.id})">Reply</button>
 						</div>
 						${nestedReplies}
 					</div>`;
@@ -2221,7 +2232,7 @@
 					'<div class="post-actions">' +
 						'<button class="action-btn">' + replyCount + ' replies</button>' +
 						'<button class="action-btn" onclick="app.toggleFavorite(' + post.id + ')">' + (post.favorited ? 'Favorited' : 'Favorite') + '</button>' +
-						'<button class="action-btn" onclick="app.replyToPost(' + post.id + ')">Reply</button>' +
+						'<button class="action-btn reply-action" onclick="app.replyToPost(' + post.id + ')">Reply</button>' +
 						'<button class="action-btn" onclick="app.askCommunity(' + post.id + ')" style="background: linear-gradient(45deg, #667eea22, #764ba222); border: 1px solid #667eea;">Ask Community</button>' +
 						'<button class="action-btn">Share</button>' +
 					'</div>' +
