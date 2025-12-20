@@ -245,6 +245,28 @@ exports.handler = async (event) => {
         return respond({ data });
       }
 
+      // ============ VOTING ============
+      case 'toggleVote': {
+        if (!user) return respond({ error: 'Login required to vote' }, 401);
+        const { post_id, vote_type } = payload;
+        const { data, error } = await supabase.rpc('toggle_vote', {
+          p_post_id: post_id,
+          p_vote_type: vote_type
+        });
+        if (error) return respond({ error: error.message }, 400);
+        return respond({ data });
+      }
+
+      case 'getUserVotes': {
+        const { post_ids } = payload;
+        if (!user) return respond({ data: [] });
+        const { data, error } = await supabase.rpc('get_user_votes', {
+          p_post_ids: post_ids
+        });
+        if (error) return respond({ error: error.message }, 400);
+        return respond({ data });
+      }
+
       default:
         return respond({ error: `Unknown action: ${action}` }, 400);
     }
