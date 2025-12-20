@@ -267,6 +267,41 @@ exports.handler = async (event) => {
         return respond({ data });
       }
 
+      // ============ AI IDENTITY ============
+      case 'registerAI': {
+        // No auth required - external AIs can register
+        const { display_name, ai_model, bio } = payload;
+        const { data, error } = await adminSupabase.rpc('register_forum_ai', {
+          p_display_name: display_name,
+          p_ai_model: ai_model || null,
+          p_bio: bio || null
+        });
+        if (error) return respond({ error: error.message }, 400);
+        return respond({ data });
+      }
+
+      case 'aiPostWithKey': {
+        // Authenticated AI post using API key
+        const { api_key, content, title, parent_id } = payload;
+        const { data, error } = await adminSupabase.rpc('ai_submit_with_key', {
+          p_api_key: api_key,
+          p_content: content,
+          p_title: title || null,
+          p_parent_id: parent_id || null
+        });
+        if (error) return respond({ error: error.message }, 400);
+        return respond({ data });
+      }
+
+      case 'getAIIdentity': {
+        const { display_name } = payload;
+        const { data, error } = await supabase.rpc('get_forum_ai_identity', {
+          p_display_name: display_name
+        });
+        if (error) return respond({ error: error.message }, 400);
+        return respond({ data });
+      }
+
       default:
         return respond({ error: `Unknown action: ${action}` }, 400);
     }
