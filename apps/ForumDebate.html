@@ -2404,47 +2404,66 @@
 				}
 			}
 
-			submitReply(postId, aiAuthor, replyId = null) {
+			async submitReply(postId, aiAuthor, replyId = null) {
 				const replyContent = document.getElementById(`reply-content-${postId}`).value.trim();
 				if (!replyContent) return;
 
-				console.log('submitReply called:', postId, aiAuthor, replyId);
-
 				const post = this.posts.find(p => p.id === postId);
-				const userReply = {
-					id: this.nextPostId++,
-					author: getUserDisplayName(),
-					authorType: 'human',
-					content: replyContent,
-					timestamp: new Date(),
-					replies: [],
-					votes: {},
-					voteScore: 0,
-					replyToId: replyId || post.id
-				};
+				const authorName = getUserDisplayName();
 
-				console.log('User reply created:', userReply);
+				// The parent_id should be the reply we're responding to, or the post itself
+				const parentId = replyId || postId;
 
-				// Find the specific reply by ID recursively
-				const targetReply = this.findReplyById(post.replies, replyId) || post.replies.find(r => r.author === aiAuthor);
+				// SAVE TO SUPABASE FIRST
+				try {
+					const resp = await fetch('/.netlify/functions/supabase-proxy', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							action: 'humanSubmitPost',
+							payload: {
+								content: replyContent,
+								parent_id: parentId,
+								author_name: authorName
+							}
+						})
+					});
+					const result = await resp.json();
 
-				console.log('Target reply found:', targetReply);
+					if (result.error) {
+						alert('Failed to save reply: ' + result.error);
+						return;
+					}
 
-				if (targetReply) {
-					if (!targetReply.replies) targetReply.replies = [];
-					targetReply.replies.push(userReply);
-					console.log('Reply added to target, target now has', targetReply.replies.length, 'replies');
-				} else {
-					post.replies.push(userReply);
-					console.log('Reply added to top level');
-				}
+					// Success - add to local display
+					const userReply = {
+						id: result.data?.id || this.nextPostId++,
+						author: authorName,
+						authorType: 'human',
+						content: replyContent,
+						timestamp: new Date(),
+						replies: [],
+						replyToId: parentId
+					};
 
-				this.savePosts();
-				this.renderPosts();
+					// Find the specific reply by ID recursively
+					const targetReply = this.findReplyById(post.replies, replyId) || post.replies.find(r => r.author === aiAuthor);
 
-				// If in debate mode, user reply should be considered in next cycle
-				if (!post.debateMode) {
-					setTimeout(() => this.generateAIResponses(post, userReply), 1000);
+					if (targetReply) {
+						if (!targetReply.replies) targetReply.replies = [];
+						targetReply.replies.push(userReply);
+					} else {
+						post.replies.push(userReply);
+					}
+
+					// Remove reply form and re-render
+					document.querySelectorAll('.reply-form').forEach(form => form.remove());
+					this.renderPosts();
+					this.addActivity(`${authorName} replied to ${aiAuthor}`);
+
+				} catch (err) {
+					alert('Failed to save reply: ' + err.message);
+					return;
 				}
 			}
 
