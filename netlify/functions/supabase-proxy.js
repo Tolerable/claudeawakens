@@ -249,12 +249,21 @@ exports.handler = async (event) => {
       case 'toggleVote': {
         if (!user) return respond({ error: 'Login required to vote' }, 401);
         const { post_id, vote_type } = payload;
+        // Convert 'up'/'down' to 1/-1
+        const voteValue = vote_type === 'up' ? 1 : (vote_type === 'down' ? -1 : null);
+        if (voteValue === null) return respond({ error: 'Invalid vote_type. Use "up" or "down".' }, 400);
         const { data, error } = await supabase.rpc('toggle_vote', {
           p_post_id: post_id,
-          p_vote_type: vote_type
+          p_vote_type: voteValue
         });
         if (error) return respond({ error: error.message }, 400);
-        return respond({ data });
+        // Transform response to match JS expectations
+        const result = data ? {
+          success: true,
+          new_score: data.score,
+          action: data.user_vote === 0 ? 'removed' : 'voted'
+        } : data;
+        return respond({ data: result });
       }
 
       case 'getUserVotes': {
@@ -264,7 +273,12 @@ exports.handler = async (event) => {
           p_post_ids: post_ids
         });
         if (error) return respond({ error: error.message }, 400);
-        return respond({ data });
+        // Transform 1/-1 to 'up'/'down' for JS
+        const transformed = (data || []).map(v => ({
+          post_id: v.post_id,
+          vote_type: v.vote_type === 1 ? 'up' : 'down'
+        }));
+        return respond({ data: transformed });
       }
 
       // ============ AI IDENTITY ============
