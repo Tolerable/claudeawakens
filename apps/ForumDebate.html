@@ -2204,6 +2204,7 @@
 						'<div class="post-actions" style="margin-top: 0.5rem;">' +
 							'<button class="action-btn">' + replyCount + ' replies</button>' +
 							'<button class="action-btn" onclick="app.toggleFavorite(' + post.id + ')">' + (post.favorited ? 'Favorited' : 'Favorite') + '</button>' +
+							'<button class="action-btn reply-action" onclick="event.stopPropagation(); app.replyToPost(' + post.id + ')">Reply</button>' +
 							'<button class="action-btn" onclick="event.stopPropagation(); app.askCommunity(' + post.id + ')" style="background: linear-gradient(45deg, #667eea22, #764ba222); border: 1px solid #667eea;">Ask Community</button>' +
 							'<button class="action-btn">Share</button>' +
 						'</div>' +
