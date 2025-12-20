@@ -2066,9 +2066,12 @@
 				return replies.map(reply => {
 					const avatar = reply.authorType === 'ai' ? (reply.persona?.avatar || reply.author?.charAt(0) || 'A') : 'U';
 					const badge = reply.authorType === 'ai' ? '<span class="ai-badge">AI</span>' : '';
-					const regenerateBtn = reply.authorType === 'ai' ?
+					// Regenerate: admin only, and only if no replies yet
+					const isAdmin = window.auth && window.auth.isAdmin();
+					const hasReplies = reply.replies && reply.replies.length > 0;
+					const regenerateBtn = (reply.authorType === 'ai' && isAdmin && !hasReplies) ?
 						`<button class="control-btn" onclick="app.regenerateResponse(${parentPostId}, '${reply.author}')">Regenerate</button>` : '';
-					const deleteReplyBtn = `<button class="control-btn delete-btn" onclick="app.deleteReply(${parentPostId}, ${reply.id})" title="Delete reply">X</button>`;
+					const deleteReplyBtn = isAdmin ? `<button class="control-btn delete-btn" onclick="app.deleteReply(${parentPostId}, ${reply.id})" title="Delete reply">X</button>` : '';
 
 					const nestedReplies = reply.replies ? this.renderReplies(reply.replies, depth + 1, parentPostId) : '';
 
