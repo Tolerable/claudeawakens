@@ -560,6 +560,7 @@
         }
     </style>
     <script src="../auth.js"></script>
+    <script src="../auth-modal.js"></script>
 </head>
 <body>
     <!-- AI Access Banner -->
@@ -2595,26 +2596,14 @@
 					window.auth.signOut();
 				}
 			} else {
-				const choice = prompt('Enter your name to post as guest, or type "login" to sign in with your eztunes account:');
-				if (choice && choice.toLowerCase() === 'login') {
-					// Simple login prompt
-					const email = prompt('Email:');
-					if (!email) return;
-					const password = prompt('Password:');
-					if (!password) return;
-
-					window.auth.signIn(email, password).then(() => {
-						alert('Logged in!');
-						updateUserStatus();
-						location.reload();
-					}).catch(err => {
-						alert('Login failed: ' + err.message);
-					});
-				} else if (choice && choice.trim()) {
-					localStorage.setItem('forum_guest_name', choice.trim());
-					updateUserStatus();
-				}
+				// Use the auth modal for proper login/signup
+				openAuthModal('signin');
 			}
+		}
+
+		// Called after successful auth to update display
+		function refreshAuthUI() {
+			updateUserStatus();
 		}
 
 		// Update status after auth init
