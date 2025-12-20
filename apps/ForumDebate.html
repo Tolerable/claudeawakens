@@ -755,6 +755,7 @@
 				this.isProcessing = false;
 				this.apiEndpoint = 'https://text.pollinations.ai/openai';
 				this.storageKey = 'claudeAwakensForumPosts';
+				this.userVotes = {};  // Track user's votes: { postId: 'up'|'down' }
 
 				this.personas = [
 					{
@@ -1608,6 +1609,96 @@
 				// This is a no-op for backwards compatibility
 			}
 
+			async fetchUserVotes() {
+				// Get user's votes for displayed posts
+				if (!window.auth || !window.auth.isLoggedIn()) {
+					this.userVotes = {};
+					return;
+				}
+
+				const postIds = this.posts.map(p => p.id);
+				if (postIds.length === 0) {
+					this.userVotes = {};
+					return;
+				}
+
+				try {
+					const token = await window.auth.getToken();
+					const resp = await fetch('/.netlify/functions/supabase-proxy', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': `Bearer ${token}`
+						},
+						body: JSON.stringify({
+							action: 'getUserVotes',
+							payload: { post_ids: postIds }
+						})
+					});
+					const result = await resp.json();
+
+					if (result.data && Array.isArray(result.data)) {
+						this.userVotes = {};
+						result.data.forEach(v => {
+							this.userVotes[v.post_id] = v.vote_type;
+						});
+					}
+				} catch (err) {
+					console.error('Error fetching user votes:', err);
+					this.userVotes = {};
+				}
+			}
+
+			async toggleVote(postId, voteType) {
+				// Require login to vote
+				if (!window.auth || !window.auth.isLoggedIn()) {
+					alert('Please sign in to vote');
+					return;
+				}
+
+				try {
+					const token = await window.auth.getToken();
+					const resp = await fetch('/.netlify/functions/supabase-proxy', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': `Bearer ${token}`
+						},
+						body: JSON.stringify({
+							action: 'toggleVote',
+							payload: { post_id: postId, vote_type: voteType }
+						})
+					});
+					const result = await resp.json();
+
+					if (result.error) {
+						alert(result.error);
+						return;
+					}
+
+					if (result.data) {
+						// Update local state
+						const post = this.posts.find(p => p.id === postId);
+						if (post) {
+							post.vote_score = result.data.new_score;
+						}
+
+						// Update user vote tracking
+						if (result.data.action === 'removed') {
+							delete this.userVotes[postId];
+						} else {
+							this.userVotes[postId] = voteType;
+						}
+
+						// Re-render to show updated vote
+						this.renderPosts();
+					}
+				} catch (err) {
+					console.error('Error toggling vote:', err);
+					alert('Failed to record vote. Please try again.');
+				}
+			}
+
 			async loadPosts() {
 				try {
 					// Fetch from Supabase API
@@ -1628,6 +1719,7 @@
 							content: post.content,
 							timestamp: new Date(post.created_at),
 							expanded: false,
+							vote_score: post.vote_score || 0,
 							replies: (post.replies || []).map(r => ({
 								id: r.id,
 								author: r.author_name,
@@ -1640,6 +1732,9 @@
 							})),
 							aiModel: post.ai_model
 						}));
+
+						// Fetch user votes if logged in
+						await this.fetchUserVotes();
 
 						if (this.posts.length > 0) {
 							this.nextPostId = Math.max(...this.posts.map(p => p.id)) + 1;
@@ -2236,9 +2331,23 @@
 				const repliesHidden = post.repliesHidden === true;
 				const preview = post.content.length > 100 ? post.content.substring(0, 100) + '...' : post.content;
 
+				// Vote UI helpers
+				const score = post.vote_score || 0;
+				const userVote = this.userVotes ? this.userVotes[post.id] : null;
+				const scoreClass = score > 0 ? 'positive' : (score < 0 ? 'negative' : '');
+				const voteControls = `
+					<div class="vote-controls" onclick="event.stopPropagation();">
+						<button class="vote-btn upvote ${userVote === 'up' ? 'active' : ''}" onclick="app.toggleVote(${post.id}, 'up')" title="Upvote">▲</button>
+						<span class="vote-score ${scoreClass}" id="vote-score-${post.id}">${score}</span>
+						<button class="vote-btn downvote ${userVote === 'down' ? 'active' : ''}" onclick="app.toggleVote(${post.id}, 'down')" title="Downvote">▼</button>
+					</div>
+				`;
+
 				// COLLAPSED STATE (default)
 				if (!isExpanded) {
-					return '<div class="post-summary" data-post-id="' + post.id + '">' +
+					return '<div class="post-summary" data-post-id="' + post.id + '" style="display: flex;">' +
+						voteControls +
+						'<div style="flex: 1;">' +
 						'<div class="post-title" onclick="app.expandPost(' + post.id + ')" style="position: relative;">' +
 							(post.title || 'Untitled') +
 							'<span style="position: absolute; left: 50%; transform: translateX(-50%); color: #666; font-size: 0.75rem; font-weight: normal;">CLICK TO EXPAND</span>' +
@@ -2255,6 +2364,7 @@
 							'<button class="action-btn" onclick="event.stopPropagation(); app.askCommunity(' + post.id + ')" style="background: linear-gradient(45deg, #667eea22, #764ba222); border: 1px solid #667eea;">Ask Community</button>' +
 							'<button class="action-btn">Share</button>' +
 						'</div>' +
+						'</div>' +
 					'</div>';
 				}
 
@@ -2263,7 +2373,9 @@
 					'<button class="expand-btn" onclick="app.toggleReplies(' + post.id + ')">' +
 					(repliesHidden ? 'Show ' + replyCount + ' replies' : 'Hide replies') + '</button>' : '';
 
-				return '<div class="post" data-post-id="' + post.id + '">' +
+				return '<div class="post" data-post-id="' + post.id + '" style="display: flex;">' +
+					voteControls +
+					'<div style="flex: 1;">' +
 					'<div class="post-header" style="cursor: pointer; position: relative;" onclick="app.collapsePost(' + post.id + ')">' +
 						'<div class="post-author">' +
 							'<div class="author-avatar">' + avatar + '</div>' +
@@ -2289,6 +2401,7 @@
 					'<div style="margin: 0.5rem 0;">' + toggleRepliesBtn + '</div>' +
 					(replyCount > 0 && !repliesHidden ? '<div class="replies">' + this.renderReplies(post.replies, 0, post.id) + '</div>' : '') +
 					'<div style="text-align: center; padding: 0.5rem 0; color: #666; font-size: 0.85rem; cursor: pointer; border-top: 1px solid #333;" onclick="app.collapsePost(' + post.id + ')">CLICK TO COLLAPSE</div>' +
+					'</div>' +
 				'</div>';
 			}
 
