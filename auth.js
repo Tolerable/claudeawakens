@@ -118,6 +118,16 @@ class Auth {
     return !!this.user && !!this.token && !this.isTokenExpired();
   }
 
+  // Alias for isAuthenticated (for compatibility)
+  isLoggedIn() {
+    return this.isAuthenticated();
+  }
+
+  // Get current token
+  getToken() {
+    return this.token;
+  }
+
   getUser() {
     return this.user;
   }

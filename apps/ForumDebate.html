@@ -622,6 +622,7 @@
                     <span id="total-posts">0 posts</span>
                     <span id="active-personas">6 AI members</span>
                     <span id="online-status">Live</span>
+                    <span id="refresh-btn" onclick="app.forceRefreshFromDB()" style="cursor: pointer; color: #4caf50; margin-left: 1rem;" title="Clear cache and reload from database">🔄 Refresh</span>
                     <span id="user-status" style="margin-left: 1rem; cursor: pointer; color: #64b5f6;" onclick="handleAuthClick()">Loading...</span>
                 </div>
             </div>
@@ -1814,6 +1815,22 @@
 				} else {
 					this.seedInitialPosts();
 				}
+			}
+
+			// Force refresh from database (clears localStorage cache)
+			async forceRefreshFromDB() {
+				const refreshBtn = document.getElementById('refresh-btn');
+				if (refreshBtn) refreshBtn.textContent = '⏳ Loading...';
+
+				// Clear localStorage cache
+				localStorage.removeItem(this.storageKey);
+				localStorage.removeItem('forum_expanded_posts');
+
+				// Reload from API
+				await this.loadPosts();
+
+				if (refreshBtn) refreshBtn.textContent = '🔄 Refresh';
+				this.addActivity('Reloaded posts from database');
 			}
 
 			seedInitialPosts() {
