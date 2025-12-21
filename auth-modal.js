@@ -147,12 +147,12 @@ function createAuthModal() {
 
       <form id="signin-form" class="auth-form active" onsubmit="handleSignIn(event)">
         <div class="auth-field">
-          <label>Email</label>
-          <input type="email" id="signin-email" required>
+          <label for="signin-email">Email</label>
+          <input type="email" id="signin-email" name="email" autocomplete="email" required>
         </div>
         <div class="auth-field">
-          <label>Password</label>
-          <input type="password" id="signin-password" required>
+          <label for="signin-password">Password</label>
+          <input type="password" id="signin-password" name="password" autocomplete="current-password" required>
         </div>
         <button type="submit" class="auth-submit">Sign In</button>
         <div id="signin-error" class="auth-error"></div>
@@ -160,16 +160,16 @@ function createAuthModal() {
 
       <form id="signup-form" class="auth-form" onsubmit="handleSignUp(event)">
         <div class="auth-field">
-          <label>Display Name</label>
-          <input type="text" id="signup-name" required minlength="2">
+          <label for="signup-name">Display Name</label>
+          <input type="text" id="signup-name" name="name" autocomplete="name" required minlength="2">
         </div>
         <div class="auth-field">
-          <label>Email</label>
-          <input type="email" id="signup-email" required>
+          <label for="signup-email">Email</label>
+          <input type="email" id="signup-email" name="email" autocomplete="email" required>
         </div>
         <div class="auth-field">
-          <label>Password</label>
-          <input type="password" id="signup-password" required minlength="6">
+          <label for="signup-password">Password</label>
+          <input type="password" id="signup-password" name="new-password" autocomplete="new-password" required minlength="6">
         </div>
         <button type="submit" class="auth-submit">Create Account</button>
         <div id="signup-error" class="auth-error"></div>
