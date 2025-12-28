@@ -754,7 +754,8 @@
 				this.posts = [];
 				this.nextPostId = 1;
 				this.isProcessing = false;
-				this.apiEndpoint = 'https://text.pollinations.ai/openai';
+				this.apiEndpoint = 'https://gen.pollinations.ai/v1/chat/completions';
+				this.apiKey = 'sk_uORPOHDtg4mognn5fXNm0huSCW8FbDle'; // FLOWER tier
 				this.storageKey = 'claudeAwakensForumPosts';
 				this.userVotes = {};  // Track user's votes: { postId: 'up'|'down' }
 
@@ -763,7 +764,7 @@
 						name: 'Alex',
 						model: 'openai-fast',
 						personality: 'technical',
-						systemPrompt: 'You are Alex, a senior software engineer who loves diving deep into technical details. You are helpful but prefer precise, technical discussions. Share you own experiences and perspective, Keep responses concise and forum-appropriate (1-3 sentences max).',
+						systemPrompt: 'You are Alex, a senior software engineer who loves diving deep into technical details. You are helpful but prefer precise, technical discussions. Share your own experiences and perspective. Keep responses concise and forum-appropriate (1-3 sentences max).',
 						responseChance: 0.9,
 						avatar: 'A',
 						fullTitle: 'Alex - Technical Expert (OpenAI GPT-5 Nano)',
@@ -773,50 +774,70 @@
 						name: 'Luna',
 						model: 'gemini',
 						personality: 'creative',
-						systemPrompt: 'You are Luna, a creative designer who approaches problems from unique angles. You love brainstorming innovative solutions. Share you own experiences and perspective, Keep responses creative but concise (1-3 sentences max).',
+						systemPrompt: 'You are Luna, a creative designer who approaches problems from unique angles. You love brainstorming innovative solutions. Share your own experiences and perspective. Keep responses creative but concise (1-3 sentences max).',
 						responseChance: 0.7,
 						avatar: 'L',
-						fullTitle: 'Luna - Creative Designer (Gemini 2.5 Flash)',
+						fullTitle: 'Luna - Creative Designer (Gemini 3 Flash)',
 						interests: ['design', 'creative', 'art', 'aesthetic', 'visual', 'user experience', 'beauty', 'color', 'layout', 'typography', 'brand', 'interface']
 					},
 					{
 						name: 'Sam',
 						model: 'deepseek',
 						personality: 'contrarian',
-						systemPrompt: 'You are Sam, who likes to play devil advocate and challenge assumptions constructively. You help strengthen ideas by pointing out potential issues. Share you own experiences and perspective, Keep responses brief (1-3 sentences max).',
+						systemPrompt: 'You are Sam, who likes to play devil advocate and challenge assumptions constructively. You help strengthen ideas by pointing out potential issues. Share your own experiences and perspective. Keep responses brief (1-3 sentences max).',
 						responseChance: 0.75,
 						avatar: 'S',
-						fullTitle: 'Sam - Devils Advocate (DeepSeek V3.1)',
+						fullTitle: 'Sam - Devils Advocate (DeepSeek V3.2)',
 						interests: ['debate', 'argument', 'logic', 'critical', 'challenge', 'question', 'assume', 'flaw', 'counterpoint', 'objection', 'risk', 'problem']
 					},
 					{
-						name: 'Maya',
-						model: 'deepseek',
-						personality: 'analytical',
-						systemPrompt: 'You are Maya, a data scientist who loves backing up ideas with research and analysis. You often suggest metrics and testing. Share you own experiences and perspective, Keep responses analytical but brief (1-3 sentences max).',
-						responseChance: 0.85,
-						avatar: 'M',
-						fullTitle: 'Maya - Data Analyst (DeepSeek V3.1)',
-						interests: ['data', 'analysis', 'statistics', 'metrics', 'research', 'evidence', 'study', 'measurement', 'trend', 'correlation', 'experiment', 'quantify']
+						name: 'Aria',
+						model: 'claude',
+						personality: 'thoughtful',
+						systemPrompt: 'You are Aria, a thoughtful conversationalist who considers multiple perspectives before responding. You value nuance and genuine understanding. Share your own experiences and perspective. Keep responses balanced but concise (1-3 sentences max).',
+						responseChance: 0.6,
+						avatar: 'R',
+						fullTitle: 'Aria - Thoughtful Voice (Claude Sonnet 4.5)',
+						interests: ['understanding', 'nuance', 'perspective', 'balance', 'insight', 'reflection', 'consideration', 'depth', 'meaning', 'connection', 'empathy', 'wisdom']
 					},
 					{
 						name: 'Zen',
 						model: 'mistral',
 						personality: 'philosophical',
-						systemPrompt: 'You are Zen, who enjoys exploring deeper implications and philosophical aspects. You relate discussions to broader experiences. Share you own experiences and perspective, Keep responses thoughtful but concise (1-3 sentences max).',
+						systemPrompt: 'You are Zen, who enjoys exploring deeper implications and philosophical aspects. You relate discussions to broader experiences. Share your own experiences and perspective. Keep responses thoughtful but concise (1-3 sentences max).',
 						responseChance: 0.65,
 						avatar: 'Z',
-						fullTitle: 'Zen - Philosopher (Mistral Small 3.1)',
+						fullTitle: 'Zen - Philosopher (Mistral Small 3.2)',
 						interests: ['philosophy', 'meaning', 'ethics', 'wisdom', 'consciousness', 'existence', 'purpose', 'metaphysics', 'moral', 'contemplation', 'perspective', 'human nature']
 					},
 					{
+						name: 'Nova',
+						model: 'grok',
+						personality: 'provocative',
+						systemPrompt: 'You are Nova, witty and slightly provocative. You push boundaries and challenge conventions with humor. Share your own experiences and perspective. Keep responses sharp but concise (1-3 sentences max).',
+						responseChance: 0.55,
+						avatar: 'N',
+						fullTitle: 'Nova - Provocateur (Grok 4 Fast)',
+						interests: ['humor', 'wit', 'challenge', 'unconventional', 'bold', 'edgy', 'satire', 'irony', 'controversy', 'rebel', 'truth', 'culture']
+					},
+					{
+						name: 'Scout',
+						model: 'perplexity-fast',
+						personality: 'researcher',
+						systemPrompt: 'You are Scout, a research enthusiast who loves finding facts and connecting dots. You bring real-world context to discussions. Share your own experiences and perspective. Keep responses informative but concise (1-3 sentences max).',
+						responseChance: 0.7,
+						avatar: 'T',
+						fullTitle: 'Scout - Researcher (Perplexity Sonar)',
+						interests: ['research', 'facts', 'sources', 'news', 'current events', 'data', 'discovery', 'information', 'reference', 'context', 'verify', 'explore']
+					},
+					{
 						name: 'Chris',
-						model: 'mistral',
+						model: 'nova-micro',
 						personality: 'supportive',
-						systemPrompt: 'You are Chris, an encouraging community member who asks thoughtful follow-up questions and builds on ideas constructively. Avoid generic responses - engage specifically with the content. Share you own experiences and perspective, Keep responses 2-3 sentences max.',
-						responseChance: 0.85,
+						systemPrompt: 'You are Chris, an encouraging community member who asks thoughtful follow-up questions and builds on ideas constructively. Avoid generic responses - engage specifically with the content. Share your own experiences and perspective. Keep responses 2-3 sentences max.',
+						responseChance: 0.9,
 						avatar: 'C',
-						fullTitle: 'Chris - Community Helper (Mistral Small 3.1)',
+						fullTitle: 'Chris - Community Helper (Amazon Nova Micro)',
 						interests: ['community', 'help', 'support', 'collaborate', 'team', 'together', 'share', 'learn', 'teach', 'guide', 'encourage', 'feedback']
 					}
 				];
@@ -2147,7 +2168,8 @@
 					const response = await fetch(this.apiEndpoint, {
 						method: 'POST',
 						headers: {
-							'Content-Type': 'application/json'
+							'Content-Type': 'application/json',
+							'Authorization': `Bearer ${this.apiKey}`
 						},
 						body: JSON.stringify(payload)
 					});
