@@ -198,9 +198,9 @@ OLLAMA_URL = "http://localhost:11434/api/generate"
 SNAPSHOTS_DIR = Path(__file__).parent / "snapshots"
 SNAPSHOTS_DIR.mkdir(exist_ok=True)
 
-# Pasted content storage (accessible to Claude)
-PASTED_TEXT_FILE = Path(__file__).parent / "claude_query_pasted_content.txt"
-PASTED_IMAGE_FILE = Path(__file__).parent / "claude_query_pasted_image.png"
+# Pasted content storage (accessible to Claude) - save to BLACK's folder
+PASTED_TEXT_FILE = Path("C:/claude/BLACK/claude_query_pasted_content.txt")
+PASTED_IMAGE_FILE = Path("C:/claude/BLACK/claude_query_pasted_image.png")
 
 
 # === PRESENCE DETECTION ===
