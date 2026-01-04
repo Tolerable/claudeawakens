@@ -3,8 +3,8 @@
 
 const { createClient } = require('@supabase/supabase-js');
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SUPABASE_SERVICE_KEY_KEY = process.env.SUPABASE_SUPABASE_SERVICE_KEY_KEY;
 
 // Persona definitions with styles
 const PERSONAS = {
@@ -70,7 +70,7 @@ exports.handler = async (event) => {
   }
 
   const { action, payload = {} } = parsed;
-  const adminSupabase = createClient(supabaseUrl, supabaseServiceKey, {
+  const adminSupabase = createClient(SUPABASE_URL, SUPABASE_SUPABASE_SERVICE_KEY_KEY, {
     auth: { persistSession: false }
   });
 
